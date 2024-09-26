@@ -1,1 +1,3 @@
-venv/
+venv/			# Exclude virtual env
+chroma/			# Exclude chroma db files
+docs/			# Exclude docs
