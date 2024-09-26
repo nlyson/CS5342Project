@@ -1,2 +1,2 @@
-# CS5342ProjectGroup3
+# CS5342Project
 Project repo for CS 5342 Project
