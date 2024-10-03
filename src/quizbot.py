@@ -1,13 +1,18 @@
+import gradio as gr
 import chromadb
 import os
 import PyPDF2
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from transformers import AutoModelForCausalLM
+import torch
 
 class QuizBot:
     def __init__(self):
         self.client = chromadb.PersistentClient(path="../chroma")
         self.lecture_notes = self.client.get_or_create_collection(name="lecture_notes", metadata={"hnsw:space" : "cosine"})
-        self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+        self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=50)
+        #self.model = AutoModelForCausalLM.from_pretrained("togethercomputer/RedPajama-INCITE-Chat-3B-v1")
+        #self.model = self.model.to('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Function to embed and add a single document to our vector db
     def add_document(self, file_name: str):
@@ -39,6 +44,9 @@ class QuizBot:
 
     # Function to add all .pdfs in a directory to our vector db
     def add_documents(self, path_to_doc_folder):
+        self.client.delete_collection(name='lecture_notes')
+        self.lecture_notes = self.client.create_collection(name='lecture_notes')
+
         for root, dirs, files in os.walk(path_to_doc_folder):
             for file_name in files:
                 if not self.add_document(os.path.join(root, file_name)):
@@ -86,11 +94,73 @@ def pdf_to_text(file_path: str):
 
     return text
 
+
+
 quizbot = QuizBot()
 
-quizbot.submit_query()
+PROMPT_MAX_TOKENS = 100
+QUERY_N_RESULTS = 4
+QUERY_MAX_DISTANCE = 10
+PROMPT_CONTEXT = """
+CS-5342 Quizbot.
 
-#quizbot.add_documents('../docs')      <-------------Uncomment this line if you need to add documents
+
+
+"""
+
+def answer(message: str, history: list[str]) -> str:
+    """Answer questions about my network security."""
+    # counters
+    n_tokens = 0
+    # messages
+    messages = []
+    # - context
+    n_tokens += len(quizbot.text_splitter.split_text(PROMPT_CONTEXT))
+    messages += [{"role": "system", "content": PROMPT_CONTEXT}]
+    # - history
+    for user_content, assistant_content in history:
+        n_tokens += len(quizbot.text_splitter.split_text(user_content))
+        n_tokens += len(quizbot.text_splitter.split_text(assistant_content))
+        messages += [{"role": "user", "content": user_content}]
+        messages += [{"role": "assistant", "content": assistant_content}]
+    # - message
+    n_tokens += len(quizbot.text_splitter.split_text(message))
+    messages += [{"role": "user", "content": message}]
+    # database
+    results = quizbot.lecture_notes.query(query_texts=message, n_results=QUERY_N_RESULTS)
+    distances, documents = results["distances"][0], results["documents"][0]
+
+    content = ""
+    choices = ['A', 'B', 'C', 'D']
+    choice_count = 0
+    for distance, document in zip(distances, documents): 
+        content += f'---------------------Choice {choices[choice_count]} ------------------------\n'
+        content += document
+        content += '\n\n\n'
+        choice_count += 1
+        """
+        # - distance
+        if distance > QUERY_MAX_DISTANCE:
+            break
+        # - document
+        n_document_tokens = len(quizbot.text_splitter.split_text(document))
+        if (n_tokens + n_document_tokens) >= PROMPT_MAX_TOKENS:
+            break
+        n_tokens += n_document_tokens
+        messages[0]["content"] += document
+        """
+
+    # response
+    #api_response = MODEL(messages=messages)
+    #content = api_response["choices"][0]["message"]["content"]
+    # return
+    return content    
+
+gr.ChatInterface(answer).launch()
+
+#quizbot.submit_query()
+
+#quizbot.add_documents('../docs')      #<-------------Uncomment this line if you need to add documents
 
 #quizbot.display_embeddings()         <---------------Uncomment this to see the embeddings
 
