@@ -2,17 +2,16 @@ import gradio as gr
 import chromadb
 import os
 import PyPDF2
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from transformers import AutoModelForCausalLM
-import torch
+import re
+import pandas as pd
+from spacy.lang.en import English # see https://spacy.io/usage for install instructions
+from tqdm.auto import tqdm # for progress bars, requires !pip install tqdm 
+
 
 class QuizBot:
     def __init__(self):
         self.client = chromadb.PersistentClient(path="../chroma")
         self.lecture_notes = self.client.get_or_create_collection(name="lecture_notes", metadata={"hnsw:space" : "cosine"})
-        self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=50)
-        #self.model = AutoModelForCausalLM.from_pretrained("togethercomputer/RedPajama-INCITE-Chat-3B-v1")
-        #self.model = self.model.to('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Function to embed and add a single document to our vector db
     def add_document(self, file_name: str):
@@ -20,19 +19,62 @@ class QuizBot:
             print('ERROR: File must be a .pdf')
             return False
 
-        text = pdf_to_text(file_name)
+        pages_and_texts = pdf_to_text(file_name)
 
-        chunks = self.text_splitter.split_text(text)
+        nlp = English()
 
-        if not chunks:
-            print(f'Error: Emptyh chunks in [{file_name}]')
-            return False
-        
+        # Add a sentencizer pipeline, see https://spacy.io/api/sentencizer/ 
+        nlp.add_pipe("sentencizer")
+
+        for item in tqdm(pages_and_texts):
+            item["sentences"] = list(nlp(item["text"]).sents)
+            
+            # Make sure all sentences are strings
+            item["sentences"] = [str(sentence) for sentence in item["sentences"]]
+            
+            # Count the sentences 
+            item["page_sentence_count_spacy"] = len(item["sentences"])
+
+        # Define split size to turn groups of sentences into chunks
+        num_sentence_chunk_size = 10 
+
+        # Loop through pages and texts and split sentences into chunks
+        for item in tqdm(pages_and_texts):
+            item["sentence_chunks"] = split_list(input_list=item["sentences"], slice_size=num_sentence_chunk_size)
+            item["num_chunks"] = len(item["sentence_chunks"])
+
+        # Split each chunk into its own item
+        pages_and_chunks = []
+        for item in tqdm(pages_and_texts):
+            for sentence_chunk in item["sentence_chunks"]:
+                chunk_dict = {}
+                chunk_dict["page_number"] = item["page_number"]
+                
+                # Join the sentences together into a paragraph-like structure, aka a chunk (so they are a single string)
+                joined_sentence_chunk = "".join(sentence_chunk).replace("  ", " ").strip()
+                joined_sentence_chunk = re.sub(r'\.([A-Z])', r'. \1', joined_sentence_chunk) # ".A" -> ". A" for any full-stop/capital letter combo 
+                chunk_dict["sentence_chunk"] = joined_sentence_chunk
+
+                # Get stats about the chunk
+                chunk_dict["chunk_char_count"] = len(joined_sentence_chunk)
+                chunk_dict["chunk_word_count"] = len([word for word in joined_sentence_chunk.split(" ")])
+                chunk_dict["chunk_token_count"] = len(joined_sentence_chunk) / 4 # 1 token = ~4 characters
+                
+                pages_and_chunks.append(chunk_dict)
+
+        # Get stats about our chunks
+        df = pd.DataFrame(pages_and_chunks)
+
+        # Get rid of random chunks with under 30 tokens in length
+        min_token_length = 30
+        pages_and_chunks_over_min_token_len = df[df["chunk_token_count"] > min_token_length].to_dict(orient="records")
+
+        # Embed chunks
         documents_list = []
         ids_list = []
 
-        for i, chunk in enumerate(chunks):
-            documents_list.append(chunk)
+        for i, item in enumerate(pages_and_chunks_over_min_token_len):
+            documents_list.append(item['sentence_chunk'])
             ids_list.append(f'{file_name}_{i}')
 
         self.lecture_notes.upsert(
@@ -45,7 +87,7 @@ class QuizBot:
     # Function to add all .pdfs in a directory to our vector db
     def add_documents(self, path_to_doc_folder):
         self.client.delete_collection(name='lecture_notes')
-        self.lecture_notes = self.client.create_collection(name='lecture_notes')
+        self.lecture_notes = self.client.create_collection(name='lecture_notes', metadata={'hnsw:space' : 'cosine'})
 
         for root, dirs, files in os.walk(path_to_doc_folder):
             for file_name in files:
@@ -86,14 +128,36 @@ class QuizBot:
 
 # Helper function to convert .pdf files to strings    
 def pdf_to_text(file_path: str):
+    pages_and_texts = []
     with open(file_path, 'rb') as pdf_file:
         pdf_reader = PyPDF2.PdfReader(pdf_file)
-        text = ""
         for page_num in range(len(pdf_reader.pages)):
-            text += pdf_reader.pages[page_num].extract_text()
+            text = pdf_reader.pages[page_num].extract_text()
+            text = text_formatter(text)
+            pages_and_texts.append({"page_number": page_num,  # adjust page numbers since our PDF starts on page 42
+                                    "page_char_count": len(text),
+                                    "page_word_count": len(text.split(" ")),
+                                    "page_sentence_count_raw": len(text.split(". ")),
+                                    "page_token_count": len(text) / 4,  # 1 token = ~4 chars, see: https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them
+                                    "text": text})
 
-    return text
+    return pages_and_texts
 
+def text_formatter(text: str):
+    """Performs minor formatting on text."""
+    cleaned_text = text.replace("\n", " ").strip() # note: this might be different for each doc (best to experiment)
+
+    # Other potential text formatting functions can go here
+    return cleaned_text
+
+# Create a function that recursively splits a list into desired sizes
+def split_list(input_list: list, slice_size: int) -> list[list[str]]:
+    """
+    Splits the input_list into sublists of size slice_size (or as close as possible).
+
+    For example, a list of 17 sentences would be split into two lists of [[10], [7]]
+    """
+    return [input_list[i:i + slice_size] for i in range(0, len(input_list), slice_size)]
 
 
 quizbot = QuizBot()
@@ -156,9 +220,9 @@ def answer(message: str, history: list[str]) -> str:
     # return
     return content    
 
-gr.ChatInterface(answer).launch()
+#gr.ChatInterface(answer).launch()
 
-#quizbot.submit_query()
+quizbot.submit_query()
 
 #quizbot.add_documents('../docs')      #<-------------Uncomment this line if you need to add documents
 
