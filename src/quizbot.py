@@ -220,9 +220,9 @@ def answer(message: str, history: list[str]) -> str:
     # return
     return content    
 
-#gr.ChatInterface(answer).launch()
+gr.ChatInterface(answer).launch()
 
-quizbot.submit_query()
+#quizbot.submit_query()
 
 #quizbot.add_documents('../docs')      #<-------------Uncomment this line if you need to add documents
 
