@@ -18,7 +18,7 @@ ollama pull llama3.2
 Step 5: Open VS Code
 code .
 
-Step 6: Open the llama_train.ipynb notebook
+Step 6: Open the src/llama_train.ipynb notebook
 
 Step 7: Run 'Dependencies' cell.
 
@@ -26,4 +26,14 @@ Step 8: Run 'Embed Documents' cell.  (use vectorstore = Chroma.from_documents(pe
 
 Step 9: Run 'Initialize Llama locally' cell.
 
-Step 10: 
+Step 10: Run 'Generate prompt with GUI using gradio' cell.
+
+Step 11: Broswe to http://127.0.0.1:7862 in your browser.
+
+Step 12: In the text box, enter one of the following:
+1) Generate a multiple choice network security question and provide feedback to my answer.
+2) Generate a true/false network security question and provide feedback to my answer.
+3) Generate a short answer network security question and provide feedback to my answer.
+
+Step 13: You can also be creative. Try telling the Chatbot to give you questions, grade them, and give you feedback.
+
