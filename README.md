@@ -9,21 +9,16 @@
   <h4>User Input:</h4>
   The user enters a prompt in the user interface.
   <h4>Embedding Generation:</h4>
-  The system converts user queries into numerical embeddings, capturing the meaning of the text.
-  <h4>Vector Database Query:</h4>
-  The application sends the generated embedding to the vector database.</br>
-  The vector database compares the user's embedding with precomputed embeddings of various documents.</br>
-  It returns a list of documents that are most relevant to the user's prompt based on the similarity of their embeddings to the user's embedding.
-  <h4>Contextual Prompt Creation:</h4>
-  The application creates a new prompt by combining the user's initial prompt with the retrieved documents as context.</br>
-  This step aims to provide additional information and context to the local Language Model.
+  The system translates the user query into a numerical embedding, encapsulating its semantic meaning.
+  <h4>Vector Database:</h4>
+  This embedding is then sent to a vector database, where it’s matched against precomputed embeddings of various documents. The database returns a list of 
+   documents most relevant to the user's query based on similarity.</br>
+  <h4>Contextual Prompt Generation:</h4>
+  The system creates a new prompt by combining the user's input with relevant documents as context. This added context enhances the prompt, equipping the Language Model with additional information.
   <h4>Local Language Model Processing (LLM):</h4>
-  The modified prompt, containing both the user's input and relevant context documents, is sent to the local Language Model (LLM).</br>
-  The LLM processes the contextual prompt and generates a response based on the combined information.</br>
-  The response includes citations or references from the context documents, demonstrating the sources used to generate the answer.
+  The contextualized prompt is sent to the local Language Model, which generates a response that considers both the user query and relevant background documents.
   <h4>User Interface Display:</h4>
-  The system presents the response along with citations in the user interface.</br>
-  Users can view the answer and sources, ensuring transparency and credibility in the information provided.
+  The system displays the response, along with citations or references to the original context documents. This transparency allows users to verify the sources and builds credibility.
 </p>
 <h2> Video </h2> 
 <video width="320" height="240" controls>
