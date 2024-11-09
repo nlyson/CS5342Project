@@ -82,7 +82,7 @@ Step 9: Run 'Initialize Llama locally' cell.
 
 Step 10: Run 'Generate prompt with GUI using gradio' cell.
 
-Step 11: Broswe to http://127.0.0.1:7862 in your browser.
+Step 11: Broswe to http://127.0.0.1:7860 in your browser.
 
 Step 12: In the text box, enter one of the following:
 1) Generate a multiple choice network security question and provide feedback to my answer.
@@ -94,14 +94,20 @@ Step 13: You can also be creative. Try telling the Chatbot to give you questions
 <h2>Identifying issues and Implementing Solutions</h2>
 <p>
   Issue 1: We initially embedded and stored the preprocessed documents into a vector database. We used similar matching to retrieve the results, but the results didn’t come in question/answer format.
+</p>
+<p>
   Solution 1: We augment the results with the llama3.2 model. We were able to augment results with generated content.
 </p>
 <p>
   Issue 2: After giving questions and answers, the quizbot would not give citations.
+</p>
+<p>
   Solution 2: We used metadata stored with the embeddings in the vector database. After performing a similar match and passing results to the LLM, we saved the metadata (document and page number) and appended the metadata to the results. 
 </p>
 <p>
   Issue 3: Overfitting in Quiz Logic: Overfitting can lead the quiz bot to perform well on familiar questions from its training data but may hinder its ability to handle new or varied quiz scenarios.
+</p>
+<p>
   Solution 3: Improving the quiz bot’s generalization can be achieved by using a diverse and representative dataset, including a wide range of real-world question types, and regularly retraining the model with fresh data.
 </p>
 
