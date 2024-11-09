@@ -54,11 +54,8 @@ python3 -m venv venv</br>
 *pip install tqdm==4.66.1</br>
 *pip install sentence_transformers==2.2.2 </br>
 *pip install flask
-
-# CS5342Project
-Project repo for CS 5342 Project
-
-Linux Instructions
+   
+<h2> Step by step instructions for executions </h2>
 
 Step 1: Clone the repo 
 git clone https://github/com/nlyson/CS5342Project
@@ -91,12 +88,6 @@ Step 12: In the text box, enter one of the following:
 1) Generate a multiple choice network security question and provide feedback to my answer.
 2) Generate a true/false network security question and provide feedback to my answer.
 3) Generate a short answer network security question and provide feedback to my answer.
-
-   
-<h2> Step by step instructions for executions </h2>
-
-•	python ingest.py # only once until the db folder is generated with all the training data </br>
-•	python app.py    # execute this command to run the application
 
 <h2>Features</h2>
 <p>
