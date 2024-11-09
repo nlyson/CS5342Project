@@ -35,22 +35,20 @@ python3 -m venv venv</br>
 ./venv/bin/activate - for MAC users</br>
 ./venv/Scripts/activate - for WINDOWS users</br>
 <h2> Requirements </h2>
-*pip install langchain==0.0.274</br>
-*pip install gpt4all==1.0.8</br>
-*pip install chromadb==0.4.7</br>
-*pip install llama-cpp-python==0.1.81</br>
-*pip install urllib3==2.0.4 </br>
-*pip install PyMuPDF==1.23.1 </br>
-*pip install python-dotenv==1.0.0 </br>
-*pip install unstructured==0.10.8 </br>
-*pip install extract-msg==0.45.0</br>
-*pip install tabulate==0.9.0</br>
-*pip install pandoc==2.3 </br>
-*pip install pypandoc==1.11 </br>
-*pip install pypdfcd</br>
-*pip install tqdm==4.66.1</br>
-*pip install sentence_transformers==2.2.2 </br>
-*pip install flask
+*pip install langchain==0.3.6</br>
+*pip install chromadb==0.5.11</br>
+*pip install llama_models==0.0.47</br>
+*pip install urllib3==2.2.3 </br>
+*pip install pypdf==5.1.0 </br>
+*pip install python-dotenv==1.0.1 </br>
+*pip install requests==2.32.3 </br>
+*pip install google-auth==2.35.0</br>
+*pip install nltk==3.9.1</br>
+*pip install pillow==10.4.0 </br>
+*pip install ipython==8.28.0 </br>
+*pip install PyPDF2==3.0.1</br>
+*pip install zipp==3.20.2</br>
+*pip install dataclasses-json==0.6.7 </br>
    
 <h2> Step by step instructions for executions </h2>
 
