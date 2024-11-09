@@ -31,6 +31,8 @@
   Your browser does not support the video tag.
 </video>
 
+https://github.com/user-attachments/assets/e2ec6121-8aa0-4b48-b943-fc297a90501d
+
 <h2> Prerequisite </h2>
 Install python3</br>
 Create virtual environment</br>
