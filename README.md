@@ -108,12 +108,17 @@ Step 13: You can also be creative. Try telling the Chatbot to give you questions
 
 <h2>Features</h2>
 <p>
-  Bot will generate random and specific topic quizes from trained datasets based on user requirement.</br>
-  Bot generates different types of questions in quiz like multiple choice, true or false and open-ended.</br>
-  Bot will provide feedback as score to user once user completes quiz.</br>
-  Bot works both as quizbot and chatbot.  
+  The bot generates quizzes on both random and specific topics based on user preferences, using its trained datasets.
+  It includes various question types, such as multiple-choice, true or false, and open-ended questions.
+  After the quiz, the bot provides feedback to the user with a score.
+  The bot functions as both a quiz bot and a chatbot, allowing for a versatile and interactive experience.
 </p>
 <h2> Describe training data and data formats </h2>
-<p>We trained our bot using lecture slides and network security textbook(Network Security Essentials: Applications and Standards sixth edition - by William Stallings)</p>
+<p>Our bot is trained using lecture slides and the Network Security slides(Network Security Essentials: Applications and Standards, Sixth Edition by William Stallings.</p>
 
+<h2>Suggestion:</h2>
+<p>To enhance the project's scalability, consider integrating real-time data updates for quizzes, ensuring that the bot stays current with new network security trends and topics. Additionally, implementing user performance tracking over time could provide valuable insights for personalized learning paths.</p>
+
+<h2>Feedback:</h2>
+<p>The proposal is clear and well-structured, with strong use of LLMs and vector databases. To improve, consider adding adaptive learning based on user performance. User testing during development will also help ensure the bot is effective and user-friendly.</p>
 
