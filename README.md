@@ -3,7 +3,7 @@
 <p>This project develops an interactive quiz bot aimed at enhancing learning in network security. It features a user- friendly interface for seamless interaction, an Embedding Model to convert text into vectors for efficient comparison, and a Vector Database (Chroma DB) to match similar knowledge documents. The bot uses Large Language Models (LLM) to process user inputs and generate accurate, contextual responses. Drawing from various sources such as textbooks, lecture slides, and online materials, the system provides personalized feedback, correct answers, and citations, ensuring an engaging and effective learning experience in network security.. The quiz includes multiple-choice questions, true/false questions, and open-ended questions. Finally, the bot will provide feedback on the user's answers if it is correct or not along with the reference source documentation title.</p>
 <h2> System Architecture </h2>
 <p align="center">
-  <img src="Architecture.png" width="500" title="sys arch">
+  <img src="Flow_diagram.png" width="500" title="sys arch">
 </p>
 <p>
   <h4>User Input:</h4>
