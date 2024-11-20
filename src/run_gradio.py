@@ -13,27 +13,37 @@ def answer(message: str, history: list[str]):
     relevant = 'yes' in relevant_response
 
     #Find similar docs if relevant
-    similar_docs = vectorstore.similarity_search(message, k=10) if relevant else []
+    similar_docs = vectorstore.similarity_search(message) if relevant else []
+
+    #Find similar docs if relevant
+    similar_docs = vectorstore.similarity_search(message) if relevant else []
+
+    if relevant:         
+        citations = "\n".join([ f"Rank {i+1}: {doc.metadata['source']} (Page {doc.metadata.get('page', 'Unknown')})" for i, doc in enumerate(similar_docs)])        
+        context = "\n".join([doc.page_content for doc in similar_docs]) 
+    else: 
+        citations = "Source: Not relevant to network security."
+        context = ""
 
     #Document the source
     source = "\n".join([f"Source: {document.metadata['source'][document.metadata['source'].index('/')+1:]} Page Number: {document.metadata['page']}" for document in similar_docs]) if relevant else "Source: Not relevant to network security."
 
     #Construct prompt using history from past requests - this will allows to take interactive quizzes
-    prompt = "\n".join([f"User: {item[0]}\nBot: {item[1][:item[1].index('Source')]}" for item in history]) + f"\nUser: {message}"
+    prompt = "\n".join([f"User: {item[0]}\nModel: {item[1][:item[1].index('Source')]}" for item in history]) + f"\nUser: {message}"
     
     #Construct context if relevant
     context = "\n".join([doc.page_content for doc in similar_docs]) if relevant else []
 
     #Send constructed prompt to llm and add message, result to history
-    response = llm(f"Context: {context}\nQuestion: {prompt}") if relevant else llm(f"Question: {prompt}")
+    response = llm(f"Question: {prompt}\nContext: {context}\n") if relevant else llm(f"Question: {prompt}")
     #history.append([message, response])
 
     #Display the reponse as well as the source
-    return (response + "\n\n" + source)
+    return (response + "\n\n" + citations)
 
 if __name__ == '__main__':
     embeddings = OllamaEmbeddings(model="llama3.2")
-    vectorstore = Chroma(persist_directory='../chroma', embedding_function=embeddings)
+    vectorstore = Chroma(persist_directory='../chroma_v2', embedding_function=embeddings)
     # Initialize LLama 3.2
     llm = Ollama(model="llama3.2", base_url="http://localhost:11434")
 
